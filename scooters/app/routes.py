@@ -1,12 +1,9 @@
-import functools
-
 from aiohttp import web
 
 from app.context import AppContext
 
 
 def wrap_handler(handler, context):
-    @functools.wraps(handler)
     async def wrapper(request):
         return await handler(request, context)
 
