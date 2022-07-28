@@ -6,7 +6,7 @@ from app import models
 
 async def get_scooters(context: AppContext) -> tp.List[models.Scooter]:
     sql = '''
-    select id, location, user from scooters
+    select id, location, "user" from scooters
     '''
 
     rows = await context.db.fetch(sql)
