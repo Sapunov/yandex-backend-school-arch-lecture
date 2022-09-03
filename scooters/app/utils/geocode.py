@@ -13,29 +13,32 @@ class GeocoderClient:
     ) -> None:
         self.api_key = api_key
         self.base_url = base_url
+        self._session = aiohttp.ClientSession(raise_for_status=True)
+        
+    def _make_url(self, path: str) -> URL:
+        return self.base_url / path
 
     async def get_address(self, location: dto.Location) -> tp.Optional[str]:
-        async with aiohttp.ClientSession(self.base_url) as session:
-            async with session.get(
-                '/1.x/',
-                params={
-                    'format': 'json',
-                    'geocode': f'{location.lat},{location.lon}',
-                    'apikey': self.api_key,
-                },
-            ) as response:
-                if response.status != 200:
-                    return None
+        async with self._session.get(
+            self._make_url('1.x/'),
+            params={
+                'format': 'json',
+                'geocode': f'{location.lat},{location.lon}',
+                'apikey': self.api_key,
+            },
+        ) as response:
+            if response.status != 200:
+                return None
 
-                data = await response.json()
+            data = await response.json()
 
-                member = data['response']['GeoObjectCollection'][
-                    'featureMember'
-                ]
+            member = data['response']['GeoObjectCollection'][
+                'featureMember'
+            ]
 
-                if not member:
-                    return None
+            if not member:
+                return None
 
-                return member[0]['GeoObject']['metaDataProperty'][
-                    'GeocoderMetaData'
-                ]['text']
+            return member[0]['GeoObject']['metaDataProperty'][
+                'GeocoderMetaData'
+            ]['text']
